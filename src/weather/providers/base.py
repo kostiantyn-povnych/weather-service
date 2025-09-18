@@ -32,12 +32,17 @@ class Location:
     country: Optional[str] = None
 
 
+class GeoCodeLocationProvider(ABC):
+    """Abstract base class for geo code location providers."""
+
+    @abstractmethod
+    async def resolve_location(self, city: str) -> list[Location]:
+        """Search for locations by city name."""
+        pass
+
+
 class WeatherProvider(ABC):
     """Abstract base class for weather providers."""
-
-    def __init__(self, api_key: str):
-        """Initialize the weather provider with API key."""
-        self.api_key = api_key
 
     @abstractmethod
     async def get_current_weather(self, location: Location) -> WeatherData:
@@ -54,6 +59,13 @@ class WeatherProvider(ABC):
     @abstractmethod
     async def search_location(self, query: str) -> list[Location]:
         """Search for locations by name."""
+        pass
+
+    @abstractmethod
+    async def get_weather_by_city(
+        self, city_name: str, country_code: str | None = None
+    ) -> WeatherData:
+        """Get current weather data by city name."""
         pass
 
     def _validate_api_key(self) -> None:

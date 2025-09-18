@@ -1,29 +1,29 @@
 """OpenWeatherMap weather provider implementation."""
 
-import aiohttp
+import httpx
 from typing import Dict, Any, List
-from .base import WeatherProvider, WeatherData, Location
+from .base import GeoCodeLocationProvider, WeatherProvider, WeatherData, Location
 
 
-class OpenWeatherMapProvider(WeatherProvider):
+class OpenWeatherMapProvider(WeatherProvider, GeoCodeLocationProvider):
     """OpenWeatherMap weather provider implementation."""
 
     BASE_URL = "https://api.openweathermap.org/data/3.0"
 
     def __init__(self, api_key: str):
         """Initialize OpenWeatherMap provider."""
-        super().__init__(api_key)
-        self.session: aiohttp.ClientSession | None = None
+        self._client: httpx.AsyncClient | None = None
+        self.api_key = api_key
 
     async def __aenter__(self):
         """Async context manager entry."""
-        self.session = aiohttp.ClientSession()
+        self._client = httpx.AsyncClient()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
-        if self.session:
-            await self.session.close()
+        if self._client:
+            await self._client.aclose()
 
     async def _make_request(
         self, endpoint: str, params: Dict[str, Any]
@@ -31,16 +31,16 @@ class OpenWeatherMapProvider(WeatherProvider):
         """Make HTTP request to OpenWeatherMap API."""
         self._validate_api_key()
 
-        if not self.session:
-            self.session = aiohttp.ClientSession()
+        if not self._client:
+            self._client = httpx.AsyncClient()
 
         url = f"{self.BASE_URL}/{endpoint}"
         params["appid"] = self.api_key
         params["units"] = "metric"  # Use metric units
 
-        async with self.session.get(url, params=params) as response:
-            response.raise_for_status()
-            return await response.json()
+        response = await self._client.get(url, params=params)
+        response.raise_for_status()
+        return await response.json()
 
     async def get_current_weather(self, location: Location) -> WeatherData:
         """Get current weather data for a location."""
@@ -88,19 +88,19 @@ class OpenWeatherMapProvider(WeatherProvider):
 
         return forecasts
 
-    async def search_location(self, query: str) -> List[Location]:
+    async def resolve_location(self, city: str) -> List[Location]:
         """Search for locations by name using OpenWeatherMap Geocoding API."""
         self._validate_api_key()
 
-        if not self.session:
-            self.session = aiohttp.ClientSession()
+        if not self._client:
+            self._client = httpx.AsyncClient()
 
         url = "http://api.openweathermap.org/geo/1.0/direct"
-        params = {"q": query, "limit": 5, "appid": self.api_key}
+        params: Dict[str, str | int] = {"q": city, "limit": 5, "appid": self.api_key}
 
-        async with self.session.get(url, params=params) as response:
-            response.raise_for_status()
-            data = await response.json()
+        response = await self._client.get(url, params=params)
+        response.raise_for_status()
+        data = await response.json()
 
         locations = []
         for item in data:
@@ -115,14 +115,18 @@ class OpenWeatherMapProvider(WeatherProvider):
 
         return locations
 
+    async def search_location(self, query: str) -> List[Location]:
+        """Search for locations by name using OpenWeatherMap Geocoding API."""
+        return await self.resolve_location(query)
+
     async def get_weather_by_city(
         self, city_name: str, country_code: str | None = None
     ) -> WeatherData:
         """Get current weather by city name."""
         self._validate_api_key()
 
-        if not self.session:
-            self.session = aiohttp.ClientSession()
+        if not self._client:
+            self._client = httpx.AsyncClient()
 
         query = city_name
         if country_code:
@@ -131,9 +135,9 @@ class OpenWeatherMapProvider(WeatherProvider):
         url = f"{self.BASE_URL}/weather"
         params = {"q": query, "appid": self.api_key, "units": "metric"}
 
-        async with self.session.get(url, params=params) as response:
-            response.raise_for_status()
-            data = await response.json()
+        response = await self._client.get(url, params=params)
+        response.raise_for_status()
+        data = await response.json()
 
         return WeatherData(
             temperature=data["main"]["temp"],

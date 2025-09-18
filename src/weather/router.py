@@ -1,8 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from weather.providers.base import WeatherData
 from weather.service import WeatherService
+from weather.dependencies import get_weather_service
 
 router = APIRouter()
 
@@ -14,11 +14,19 @@ class WeatherResponse(BaseModel):
     description: str
     wind_speed: float
     wind_direction: int
+    visibility: int | None = None
+    uv_index: float | None = None
+    feels_like: float | None = None
+    min_temp: float | None = None
+    max_temp: float | None = None
 
     class Config:
         from_attributes = True
 
 
 @router.get("/weather")
-async def get_weather(service: WeatherService, city: str) -> WeatherResponse:
-    return await service.get_weather_by_city(city)
+async def get_weather(
+    city: str, service: WeatherService = Depends(get_weather_service)
+) -> WeatherResponse:
+    weather_data = await service.get_weather_by_city(city)
+    return WeatherResponse.model_validate(weather_data)

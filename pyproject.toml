@@ -5,7 +5,11 @@ description = "Simple weather service"
 authors = [
     { name = "Kostiantyn Povnych", email = "kostiantyn.povnych@gmail.com" },
 ]
-dependencies = ["fastapi>=0.116.2"]
+dependencies = [
+    "fastapi>=0.116.2",
+    "aiohttp>=3.8.0",
+    "pydantic-settings>=2.10.1",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 

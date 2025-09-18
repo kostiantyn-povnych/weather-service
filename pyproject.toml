@@ -5,7 +5,7 @@ description = "Simple weather service"
 authors = [
     { name = "Kostiantyn Povnych", email = "kostiantyn.povnych@gmail.com" },
 ]
-dependencies = []
+dependencies = ["fastapi>=0.116.2"]
 readme = "README.md"
 requires-python = ">= 3.8"
 
@@ -15,7 +15,18 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = []
+dev-dependencies = [
+    "black>=25.1.0",
+    "ruff>=0.11.12",
+    "mypy>=1.16.0",
+    "typos>=1.32.0",
+    "alembic>=1.16.1",
+    "types-python-jose>=3.5.0.20250531",
+    "fastapi[standard]>=0.116.2",
+]
+
+[tool.rye.scripts]
+all-checks = "sh -c 'black src/ --check && ruff check && mypy src/' && typos ."
 
 [tool.hatch.metadata]
 allow-direct-references = true

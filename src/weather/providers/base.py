@@ -1,8 +1,10 @@
 """Base weather provider interface."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Self
 from dataclasses import dataclass
+
+from geo.base import Location
 
 
 @dataclass
@@ -22,57 +24,36 @@ class WeatherData:
     max_temp: Optional[float] = None
 
 
-@dataclass
-class Location:
-    """Location data model."""
-
-    latitude: float
-    longitude: float
-    city: Optional[str] = None
-    country: Optional[str] = None
-
-
-class GeoCodeLocationProvider(ABC):
-    """Abstract base class for geo code location providers."""
-
-    @abstractmethod
-    async def resolve_location(self, city: str) -> list[Location]:
-        """Search for locations by city name."""
-        pass
-
-
 class WeatherProvider(ABC):
     """Abstract base class for weather providers."""
+
+    @abstractmethod
+    async def __aenter__(self) -> Self:
+        """Async context manager entry."""
+        pass
+
+    @abstractmethod
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        pass
 
     @abstractmethod
     async def get_current_weather(self, location: Location) -> WeatherData:
         """Get current weather data for a location."""
         pass
 
-    @abstractmethod
-    async def get_weather_forecast(
-        self, location: Location, days: int = 5
-    ) -> list[WeatherData]:
-        """Get weather forecast for a location."""
-        pass
+    # @abstractmethod
+    # async def get_weather_forecast(
+    #     self, location: Location, days: int = 5
+    # ) -> list[WeatherData]:
+    #     """Get weather forecast for a location."""
+    #     pass
+
+
+class WeatherProviderFactory(ABC):
+    """Abstract base class for weather provider factories."""
 
     @abstractmethod
-    async def search_location(self, query: str) -> list[Location]:
-        """Search for locations by name."""
+    def provider(self) -> WeatherProvider:
+        """Get weather provider instance."""
         pass
-
-    @abstractmethod
-    async def get_weather_by_city(
-        self, city_name: str, country_code: str | None = None
-    ) -> WeatherData:
-        """Get current weather data by city name."""
-        pass
-
-    def _validate_api_key(self) -> None:
-        """Validate that API key is provided."""
-        if not self.api_key:
-            raise ValueError("API key is required")
-
-    def _build_request_params(self, location: Location, **kwargs) -> Dict[str, Any]:
-        """Build common request parameters."""
-        return {"lat": location.latitude, "lon": location.longitude, **kwargs}

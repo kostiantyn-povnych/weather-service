@@ -1,7 +1,7 @@
 """Base weather provider interface."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, Self
+from typing import Optional
 from dataclasses import dataclass
 
 from geo.base import Location
@@ -28,7 +28,7 @@ class WeatherProvider(ABC):
     """Abstract base class for weather providers."""
 
     @abstractmethod
-    async def __aenter__(self) -> Self:
+    async def __aenter__(self) -> "WeatherProvider":
         """Async context manager entry."""
         pass
 

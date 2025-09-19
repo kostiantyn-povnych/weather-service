@@ -2,7 +2,7 @@
 
 import logging
 import httpx
-from typing import Dict, Any, List
+from typing import Dict, Any
 from .base import WeatherProvider, WeatherData, Location, WeatherProviderFactory
 
 LOGGER = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class OpenWeatherMapProvider(WeatherProvider):
         response = await self.httpx_client().get(url, params=params)
 
         if response.is_error:
-            LOGGER.error(f"Error response from OpenWeatherMap API: {response.content}")
+            LOGGER.error(f"Error response from OpenWeatherMap API: {response.text}")
 
         response.raise_for_status()
         return response.json()

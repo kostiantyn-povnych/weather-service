@@ -1,6 +1,8 @@
 import os
-from data_store.base import BaseDataStore
+
 import aioboto3
+
+from data_store.base import BaseDataStore
 
 
 class AwsS3DataStore(BaseDataStore):

@@ -42,6 +42,9 @@ botocore==1.39.11
     # via aiobotocore
     # via boto3
     # via s3transfer
+botocore-stubs==1.40.33
+    # via types-aioboto3
+    # via types-aiobotocore
 certifi==2025.8.3
     # via httpcore
     # via httpx
@@ -170,9 +173,17 @@ starlette==0.48.0
 typer==0.17.4
     # via fastapi-cli
     # via fastapi-cloud-cli
+types-aioboto3==15.1.0
+types-aiobotocore==2.24.2
+    # via types-aioboto3
+types-aiofiles==24.1.0.20250822
+types-awscrt==0.27.6
+    # via botocore-stubs
 types-pyasn1==0.6.0.20250914
     # via types-python-jose
 types-python-jose==3.5.0.20250531
+types-s3transfer==0.13.1
+    # via types-aioboto3
 typing-extensions==4.15.0
     # via aiosignal
     # via alembic

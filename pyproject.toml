@@ -9,6 +9,8 @@ dependencies = [
     "fastapi>=0.116.2",
     "aiohttp>=3.8.0",
     "pydantic-settings>=2.10.1",
+    "aiofiles>=24.1.0",
+    "aioboto3>=15.1.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -27,10 +29,14 @@ dev-dependencies = [
     "alembic>=1.16.1",
     "types-python-jose>=3.5.0.20250531",
     "fastapi[standard]>=0.116.2",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.28.0",
 ]
 
 [tool.rye.scripts]
 all-checks = "sh -c 'black src/ --check && ruff check && mypy src/' && typos ."
+test = "pytest tests/ -v"
 
 [tool.hatch.metadata]
 allow-direct-references = true

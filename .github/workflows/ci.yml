@@ -29,3 +29,6 @@ jobs:
       
     - name: Run all checks
       run: rye run all-checks
+      
+    - name: Run integration tests
+      run: rye run test

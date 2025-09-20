@@ -15,5 +15,12 @@ class AwsDynamoDBEventStore(BaseEventStore):
         session = aioboto3.Session()
         async with session.resource("dynamodb") as dynamodb:
             table = dynamodb.Table(self.table_name)
-            await table.put_item(Item=event.model_dump())
+            event_dict = {
+                "timestamp": event.timestamp.isoformat(),
+                "city": event.city,
+                "country_code": event.country_code,
+                "state": event.state,
+                "url": event.url,
+            }
+            await table.put_item(Item=event_dict)
             LOGGER.info(f"Pushed event to DynamoDB: {event}")

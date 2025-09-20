@@ -1,3 +1,4 @@
+import json
 import logging
 from pathlib import Path
 
@@ -13,6 +14,14 @@ class LocalEventStore(BaseEventStore):
         self.file_path = file_path
 
     async def store_event(self, event: Event) -> None:
+
         async with aiofiles.open(self.file_path, "a") as f:
-            await f.write(event.model_dump_json() + "\n")
+            event_dict = {
+                "timestamp": event.timestamp.isoformat(),
+                "city": event.city,
+                "country_code": event.country_code,
+                "state": event.state,
+                "url": event.url,
+            }
+            await f.write(json.dumps(event_dict) + "\n")
             LOGGER.info(f"Pushed event to local file: {event}")

@@ -63,6 +63,7 @@ email-validator==2.3.0
     # via pydantic
 fastapi==0.116.2
     # via fastapi-cache2
+    # via fastapi-redis-rate-limiter
     # via weather-service
 fastapi-cache2==0.2.2
     # via weather-service
@@ -70,6 +71,8 @@ fastapi-cli==0.0.12
     # via fastapi
 fastapi-cloud-cli==0.1.5
     # via fastapi-cli
+fastapi-redis-rate-limiter==1.0.1
+    # via weather-service
 frozenlist==1.7.0
     # via aiohttp
     # via aiosignal
@@ -85,6 +88,7 @@ httptools==0.6.4
 httpx==0.28.1
     # via fastapi
     # via fastapi-cloud-cli
+    # via fastapi-redis-rate-limiter
 idna==3.10
     # via anyio
     # via email-validator
@@ -156,6 +160,7 @@ python-multipart==0.0.20
 pyyaml==6.0.2
     # via uvicorn
 redis==6.4.0
+    # via fastapi-redis-rate-limiter
     # via weather-service
 rich==14.1.0
     # via rich-toolkit
@@ -180,6 +185,7 @@ sqlalchemy==2.0.43
     # via alembic
 starlette==0.48.0
     # via fastapi
+    # via fastapi-redis-rate-limiter
 typer==0.17.4
     # via fastapi-cli
     # via fastapi-cloud-cli

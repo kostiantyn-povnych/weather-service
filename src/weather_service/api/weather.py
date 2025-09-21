@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from weather.service import WeatherService
-from weather.dependencies import get_weather_service
+from weather_service.api.caching import cache_or_nop
+from weather_service.core.weather.dependencies import get_weather_service
+from weather_service.core.weather.service import WeatherService
 
 router = APIRouter()
 
@@ -25,6 +26,7 @@ class WeatherResponse(BaseModel):
 
 
 @router.get("/weather", response_model=WeatherResponse)
+@cache_or_nop()
 async def get_weather(
     city: str,
     country_code: str | None = None,

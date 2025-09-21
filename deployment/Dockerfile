@@ -8,6 +8,7 @@ WORKDIR /app
 COPY pyproject.toml ./
 COPY requirements.lock ./
 COPY README.md ./
+COPY config/logging.yml ./config/logging.yml
 
 RUN pip install --no-cache-dir -r requirements.lock
 
@@ -20,4 +21,4 @@ ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "weather_service.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--log-config", "config/logging.yml"]

@@ -1,10 +1,10 @@
 """Base weather provider interface."""
 
 from abc import ABC, abstractmethod
-from typing import Optional
 from dataclasses import dataclass
+from typing import Optional
 
-from geo.base import Location
+from weather_service.core.geo.base import Location
 
 
 @dataclass

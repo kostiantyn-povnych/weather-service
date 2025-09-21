@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -14,9 +14,14 @@ class DataStoreType(str, Enum):
     AWS_S3 = "aws_s3"
 
 
+class CacheBackendType(StrEnum):
+    REDIS = "redis"
+    MEMORY = "memory"
+
+
 class CacheSettings(BaseSettings):
     enabled: bool = Field(default=False, alias="CACHE_ENABLED")
-    backend: str = Field(default="memory", alias="CACHE_BACKEND")  # "redis" | "memory"
+    backend: CacheBackendType | None = Field(default=None, alias="CACHE_BACKEND")
     ttl_seconds: int = Field(default=300, alias="CACHE_TTL_SECONDS")
     prefix: str = Field(default="weather-cache", alias="CACHE_PREFIX")
     redis_url: str | None = Field(default=None, alias="REDIS_URL")

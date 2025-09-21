@@ -8,13 +8,13 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache as _cache
 from redis.asyncio import from_url
 
-from settings import settings
+from weather_service.core.settings import settings
 
 LOGGER = logging.getLogger(__name__)
 
 
 def cache_or_nop(
-    *, expire: int, namespace: str
+    *, expire: int = settings.cache.ttl_seconds, namespace: str = settings.cache.prefix
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Returns fastapi-cache2's @cache if enabled; otherwise a no-op decorator.

@@ -1,7 +1,8 @@
 import os
+
 import aiofiles
 
-from data_store.base import BaseDataStore
+from weather_service.core.data_store.base import BaseDataStore
 
 
 class LocalFileDataStore(BaseDataStore):

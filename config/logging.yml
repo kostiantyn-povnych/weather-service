@@ -11,7 +11,6 @@ formatters:
     "()": uvicorn.logging.AccessFormatter
     fmt: '%(levelprefix)s [%(asctime)s] server.access: %(client_addr)s - "%(request_line)s" %(status_code)s'
     datefmt: "%Y-%m-%d %H:%M:%S"
-  # Override for uvicorn.error
   server:
     "()": uvicorn.logging.DefaultFormatter
     fmt: "%(levelprefix)s [%(asctime)s] server: %(message)s"
@@ -42,12 +41,34 @@ loggers:
 
   # One line per HTTP request
   uvicorn.access:
-    level: INFO
+    level: DEBUG
     handlers: [access]
     propagate: false
 
   # Your app namespace (use logging.getLogger("weather") or "weather.api", etc.)
   weather:
+    level: INFO
+    handlers: [console]
+    propagate: false
+
+  # Application modules
+  caching:
+    level: INFO
+    handlers: [console]
+    propagate: false
+
+  events:
+    level: INFO
+    handlers: [console]
+    propagate: false
+
+  geo:
+    level: INFO
+    handlers: [console]
+    propagate: false
+
+  # Main module logger
+  __main__:
     level: INFO
     handlers: [console]
     propagate: false

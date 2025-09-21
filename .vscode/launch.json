@@ -13,14 +13,14 @@
         "PYTHONPATH": "${workspaceFolder}/src"
       },
       "args": [
-        "main:app",
+        "weather_service.api.app:app",
         "--host",
         "0.0.0.0",
         "--port",
         "8000",
         "--reload",
         "--log-config",
-        "src/logging/logging.yml"
+        "config/logging.yml"
       ],
       "jinja": true
     }

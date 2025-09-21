@@ -1,12 +1,21 @@
+import logging
 import os
 
 import aiofiles
 
 from weather_service.core.data_store.base import BaseDataStore
 
+LOGGER = logging.getLogger(__name__)
+
 
 class LocalFileDataStore(BaseDataStore):
     def __init__(self, directory: str):
+
+        LOGGER.info(f"Initializing local file data store with directory: {directory}")
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
         self.directory = directory
 
     async def upload_file(self, object_name: str, data: bytes):

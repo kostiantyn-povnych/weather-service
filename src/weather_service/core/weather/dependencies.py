@@ -40,28 +40,28 @@ def get_geo_code_provider() -> GeoCodeLocationProvider:
 @lru_cache()
 def get_event_store() -> BaseEventStore:
     """Get event store instance based on configuration."""
-    if settings.event_store_type == EventStoreType.LOCAL:
-        return LocalEventStore(file_path=Path(settings.event_store_local_file_path))
-    elif settings.event_store_type == EventStoreType.AWS_DYNAMODB:
+    if settings.event_store.type == EventStoreType.LOCAL:
+        return LocalEventStore(file_path=Path(settings.event_store.local.file_path))
+    elif settings.event_store.type == EventStoreType.AWS_DYNAMODB:
         return AwsDynamoDBEventStore(
-            table_name=settings.event_store_dynamodb_table_name
+            table_name=settings.event_store.aws_dynamodb.table_name
         )
     else:
-        raise ValueError(f"Unsupported event store type: {settings.event_store_type}")
+        raise ValueError(f"Unsupported event store type: {settings.event_store.type}")
 
 
 @lru_cache()
 def get_data_store() -> BaseDataStore:
     """Get data store instance based on configuration."""
-    if settings.data_store_type == DataStoreType.LOCAL:
-        return LocalFileDataStore(directory=settings.data_store_local_directory)
-    elif settings.data_store_type == DataStoreType.AWS_S3:
+    if settings.data_store.type == DataStoreType.LOCAL:
+        return LocalFileDataStore(directory=settings.data_store.local.directory)
+    elif settings.data_store.type == DataStoreType.AWS_S3:
         return AwsS3DataStore(
-            bucket_name=settings.data_store_s3_bucket_name,
-            folder_name=settings.data_store_s3_folder_name,
+            bucket_name=settings.data_store.aws_s3.bucket_name,
+            folder_name=settings.data_store.aws_s3.folder_name,
         )
     else:
-        raise ValueError(f"Unsupported data store type: {settings.data_store_type}")
+        raise ValueError(f"Unsupported data store type: {settings.data_store.type}")
 
 
 def get_weather_service(

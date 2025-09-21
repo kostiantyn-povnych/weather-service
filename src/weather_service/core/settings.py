@@ -36,23 +36,44 @@ class RateLimitingSettings(BaseSettings):
     window: int = Field(default=60, alias="RATE_LIMIT_WINDOW_SECONDS")
 
 
+class LocalEventStoreSettings(BaseSettings):
+    file_path: str = "events.log"
+
+
+class AwsDynamoDBEventStoreSettings(BaseSettings):
+    table_name: str = "weather-svc-events"
+
+
+class EventStoreSettings(BaseSettings):
+    type: EventStoreType = EventStoreType.LOCAL
+    local: LocalEventStoreSettings = LocalEventStoreSettings()
+    aws_dynamodb: AwsDynamoDBEventStoreSettings = AwsDynamoDBEventStoreSettings()
+
+
+class LocalFileDataStoreSettings(BaseSettings):
+    directory: str = "data"
+
+
+class AwsS3DataStoreSettings(BaseSettings):
+    bucket_name: str = "weather-svc-data"
+    folder_name: str = "weather-svc-responses"
+
+
+class DataStoreSettings(BaseSettings):
+    type: DataStoreType = DataStoreType.LOCAL
+    local: LocalFileDataStoreSettings = LocalFileDataStoreSettings()
+    aws_s3: AwsS3DataStoreSettings = AwsS3DataStoreSettings()
+
+
 class Settings(BaseSettings):
     openweathermap_api_key: str | None = Field(
         default=None, alias="OPENWEATHERMAP_API_KEY", repr=False
     )
 
-    # Event store configuration
-    event_store_type: EventStoreType = EventStoreType.LOCAL
-    event_store_local_file_path: str = "events.log"
-    event_store_dynamodb_table_name: str = "weather-svc-events"
-
-    # Data store configuration
-    data_store_type: DataStoreType = DataStoreType.LOCAL
-    data_store_local_directory: str = "data"
-    data_store_s3_bucket_name: str = "weather-svc-data"
-    data_store_s3_folder_name: str = "weather-svc-responses"
-
+    event_store: EventStoreSettings = EventStoreSettings()
+    data_store: DataStoreSettings = DataStoreSettings()
     cache: CacheSettings = CacheSettings()
+    rate_limiting: RateLimitingSettings = RateLimitingSettings()
 
     rate_limiting: RateLimitingSettings = RateLimitingSettings()
 

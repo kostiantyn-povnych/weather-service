@@ -4,11 +4,13 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
+from dataclasses_json import DataClassJsonMixin
+
 from weather_service.core.geo.base import Location
 
 
 @dataclass
-class WeatherData:
+class WeatherData(DataClassJsonMixin):
     """Weather data model."""
 
     temperature: float

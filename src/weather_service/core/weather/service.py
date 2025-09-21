@@ -1,5 +1,8 @@
+import datetime
+from datetime import datetime as dt
+
 from weather_service.core.data_store.base import BaseDataStore
-from weather_service.core.events.base import BaseEventStore
+from weather_service.core.events.base import BaseEventStore, Event
 from weather_service.core.exceptions import BaseServiceException
 from weather_service.core.geo.base import GeoCodeLocationProvider
 from weather_service.core.weather.providers.base import Location, WeatherProviderFactory
@@ -15,11 +18,22 @@ class WeatherService:
     ):
         self.provider_factory = weather_provider_factory
         self.geo_code_provider = geo_code_provider
+        self.data_store = data_store
+        self.event_store = event_store
+
+    def _format_file_name(
+        self, city_name: str, country_code: str | None, state: str | None
+    ) -> str:
+        return f"{city_name}_{country_code}_{state}_{dt.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}.json"
 
     async def get_weather_by_city(
         self, city_name: str, country_code: str | None = None, state: str | None = None
     ):
         """Get weather data by city name using the provider."""
+
+        city_name = city_name.lower().strip()
+        country_code = country_code.lower().strip() if country_code else None
+        state = state.lower().strip() if state else None
 
         locations = await self.geo_code_provider.resolve_locations(
             city_name, country_code, state
@@ -31,7 +45,23 @@ class WeatherService:
             raise AmbiguousLocationException(city_name, country_code, state, locations)
 
         async with self.provider_factory.provider() as provider:
-            weather_info = await provider.get_current_weather(locations[0])
+            location = locations[0]
+            weather_info = await provider.get_current_weather(location)
+
+            url = await self.data_store.upload_file(
+                self._format_file_name(location.name, location.country, location.state),
+                weather_info.to_json(indent=4).encode("utf-8"),
+            )
+            await self.event_store.store_event(
+                Event(
+                    timestamp=dt.now(datetime.UTC),
+                    city=location.name,
+                    country_code=location.country,
+                    state=location.state,
+                    url=url,
+                )
+            )
+
             return weather_info
 
 

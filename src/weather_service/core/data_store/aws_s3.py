@@ -2,7 +2,7 @@ import os
 
 import aioboto3
 
-from data_store.base import BaseDataStore
+from weather_service.core.data_store.base import BaseDataStore
 
 
 class AwsS3DataStore(BaseDataStore):

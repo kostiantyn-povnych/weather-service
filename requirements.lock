@@ -56,6 +56,9 @@ email-validator==2.3.0
     # via fastapi
     # via pydantic
 fastapi==0.116.2
+    # via fastapi-cache2
+    # via weather-service
+fastapi-cache2==0.2.2
     # via weather-service
 fastapi-cli==0.0.12
     # via fastapi
@@ -95,6 +98,8 @@ multidict==6.6.4
     # via aiobotocore
     # via aiohttp
     # via yarl
+pendulum==3.1.0
+    # via fastapi-cache2
 propcache==0.3.2
     # via aiohttp
     # via yarl
@@ -111,6 +116,7 @@ pygments==2.19.2
 python-dateutil==2.9.0.post0
     # via aiobotocore
     # via botocore
+    # via pendulum
 python-dotenv==1.1.1
     # via pydantic-settings
     # via uvicorn
@@ -118,6 +124,8 @@ python-multipart==0.0.20
     # via fastapi
 pyyaml==6.0.2
     # via uvicorn
+redis==6.4.0
+    # via weather-service
 rich==14.1.0
     # via rich-toolkit
     # via typer
@@ -145,6 +153,7 @@ typing-extensions==4.15.0
     # via aiosignal
     # via anyio
     # via fastapi
+    # via fastapi-cache2
     # via pydantic
     # via pydantic-core
     # via rich-toolkit
@@ -154,11 +163,14 @@ typing-extensions==4.15.0
 typing-inspection==0.4.1
     # via pydantic
     # via pydantic-settings
+tzdata==2025.2
+    # via pendulum
 urllib3==2.5.0
     # via botocore
     # via sentry-sdk
 uvicorn==0.36.0
     # via fastapi
+    # via fastapi-cache2
     # via fastapi-cli
     # via fastapi-cloud-cli
 uvloop==0.21.0

@@ -1,6 +1,8 @@
-from common.exceptions import BaseServiceException
-from geo.base import GeoCodeLocationProvider
-from weather.providers.base import Location, WeatherProviderFactory
+from weather_service.core.data_store.base import BaseDataStore
+from weather_service.core.events.base import BaseEventStore
+from weather_service.core.exceptions import BaseServiceException
+from weather_service.core.geo.base import GeoCodeLocationProvider
+from weather_service.core.weather.providers.base import Location, WeatherProviderFactory
 
 
 class WeatherService:
@@ -8,6 +10,8 @@ class WeatherService:
         self,
         weather_provider_factory: WeatherProviderFactory,
         geo_code_provider: GeoCodeLocationProvider,
+        event_store: BaseEventStore,
+        data_store: BaseDataStore,
     ):
         self.provider_factory = weather_provider_factory
         self.geo_code_provider = geo_code_provider
@@ -22,7 +26,7 @@ class WeatherService:
         )
 
         if len(locations) == 0:
-            raise LocationNotFoundException(f"Location {city_name} not found")
+            raise CityNotFoundException(city_name)
         elif len(locations) > 1:
             raise AmbiguousLocationException(city_name, country_code, state, locations)
 
@@ -31,11 +35,10 @@ class WeatherService:
             return weather_info
 
 
-class LocationNotFoundException(BaseServiceException):
-    def __init__(self, message: str):
-        # Not found returned by the Geocoding API indicates that the city was specified incorrectly.
-        # Therefore, map a bad request status code.
-        super().__init__(message, 400)
+class CityNotFoundException(BaseServiceException):
+    def __init__(self, city_name: str):
+        message = f"City '{city_name}' not found"
+        super().__init__(message, 404)
 
 
 class AmbiguousLocationException(BaseServiceException):

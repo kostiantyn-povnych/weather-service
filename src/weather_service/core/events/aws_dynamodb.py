@@ -2,7 +2,7 @@ import logging
 
 import aioboto3
 
-from events.base import BaseEventStore, Event
+from weather_service.core.events.base import BaseEventStore, Event
 
 LOGGER = logging.getLogger(__name__)
 

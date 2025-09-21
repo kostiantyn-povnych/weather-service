@@ -1,7 +1,9 @@
 import json
 import logging
-from geo.base import GeoCodeLocationProvider, Location
+
 import httpx
+
+from weather_service.core.geo.base import GeoCodeLocationProvider, Location
 
 DEFAULT_BASE_URL = "https://api.openweathermap.org/geo/1.0"
 

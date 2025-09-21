@@ -1,23 +1,22 @@
-from datetime import timedelta
 from functools import lru_cache
 from pathlib import Path
 
-from data_store.aws_s3 import AwsS3DataStore
-from events.aws_dynamodb import AwsDynamoDBEventStore
 from fastapi import Depends
 
-from data_store.base import BaseDataStore
-from data_store.local import LocalFileDataStore
-from events.base import BaseEventStore
-from events.local import LocalEventStore
-from geo.base import GeoCodeLocationProvider
-from geo.open_weather_geo_provider import OpenWeatherGeoProvider
-from settings import DataStoreType, EventStoreType, settings
-from weather.providers.base import WeatherProviderFactory
-from weather.providers.openweathermap import (
+from weather_service.core.data_store.aws_s3 import AwsS3DataStore
+from weather_service.core.data_store.base import BaseDataStore
+from weather_service.core.data_store.local import LocalFileDataStore
+from weather_service.core.events.aws_dynamodb import AwsDynamoDBEventStore
+from weather_service.core.events.base import BaseEventStore
+from weather_service.core.events.local import LocalEventStore
+from weather_service.core.geo.base import GeoCodeLocationProvider
+from weather_service.core.geo.open_weather_geo_provider import OpenWeatherGeoProvider
+from weather_service.core.settings import DataStoreType, EventStoreType, settings
+from weather_service.core.weather.providers.base import WeatherProviderFactory
+from weather_service.core.weather.providers.openweathermap import (
     OpenWeatherMapProviderFactory,
 )
-from weather.service import WeatherService
+from weather_service.core.weather.service import WeatherService
 
 
 @lru_cache()

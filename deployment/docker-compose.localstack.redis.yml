@@ -1,0 +1,62 @@
+version: "3.8"
+
+services:
+  weather-service:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # your existing env
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY:-}
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://localstack:4566
+
+      # cache config (toggleable)
+      - CACHE_ENABLED=${CACHE_ENABLED:-true}
+      - CACHE_BACKEND=${CACHE_BACKEND:-redis} # redis | memory
+      - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-1}
+      - CACHE_PREFIX=${CACHE_PREFIX:-weather-cache}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      - localstack
+      - redis
+    networks:
+      - weather-network
+
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,dynamodb
+      - DEBUG=1
+      - DATA_DIR=/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - weather-network
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis-data:/data
+    networks:
+      - weather-network
+
+networks:
+  weather-network:
+    driver: bridge
+
+volumes:
+  redis-data:

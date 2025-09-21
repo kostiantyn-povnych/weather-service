@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
 
 from weather_service.api.caching import init_cache
+from weather_service.api.rate_limiting import init_rate_limiting
 from weather_service.api.weather import router as weather_router
 from weather_service.core.exceptions import BaseServiceException
 
@@ -15,9 +16,9 @@ LOGGER = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     LOGGER.info("Entering FastAPi application lifespan")
 
-    await init_cache(app)
-
+    init_cache()
     yield
+
     LOGGER.info("Exiting FastAPI application lifespan")
 
 
@@ -29,6 +30,8 @@ def fastApiApp():
         redoc_url="/redoc",  # ReDoc
         lifespan=lifespan,
     )
+
+    init_rate_limiting(app)
 
     @app.exception_handler(BaseServiceException)
     async def handle_service_layer_exception(

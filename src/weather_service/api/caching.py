@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Callable
 
-from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend
@@ -29,7 +28,7 @@ def cache_or_nop(
     return _passthrough
 
 
-async def init_cache(app: FastAPI) -> None:
+def init_cache() -> None:
     """
     Initialize cache backend if caching is enabled.
     - redis backend if CACHE_BACKEND=redis
@@ -40,10 +39,11 @@ async def init_cache(app: FastAPI) -> None:
         LOGGER.info("Caching is disabled")
         return
 
+    LOGGER.info("Initializing cache with configuration: %s", settings.cache)
+
     prefix = settings.cache.prefix
 
     if settings.cache.backend == "redis":
-        LOGGER.info("Initializing Redis cache...")
         redis = from_url(
             settings.cache.redis_url, encoding="utf-8", decode_responses=True
         )

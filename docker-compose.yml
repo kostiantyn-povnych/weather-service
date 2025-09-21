@@ -12,12 +12,20 @@ services:
       - AWS_DEFAULT_REGION=us-east-1
       - AWS_ENDPOINT_URL=http://localstack:4566
 
-      # cache config (toggleable)
+      # cache config
       - CACHE_ENABLED=true
       - CACHE_BACKEND=redis # redis | memory
       - CACHE_TTL_SECONDS=1
       - CACHE_PREFIX=weather-cache
       - REDIS_URL=redis://redis:6379/0
+
+      # rate limiting config
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_REDIS_HOST=redis
+      - RATE_LIMIT_REDIS_PORT=6379
+      - RATE_LIMIT_REDIS_DB=0
+      - RATE_LIMIT_REQUESTS=1
+      - RATE_LIMIT_WINDOW_SECONDS=1
     depends_on:
       - localstack
       - redis

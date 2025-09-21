@@ -14,6 +14,7 @@ dependencies = [
     "cachetools>=6.2.0",
     "redis>=6.4.0",
     "fastapi-cache2>=0.2.2",
+    "fastapi-redis-rate-limiter>=1.0.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.12"
@@ -48,3 +49,8 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/weather_service"]
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = "fastapi_redis_rate_limiter.*"
+ignore_missing_imports = true

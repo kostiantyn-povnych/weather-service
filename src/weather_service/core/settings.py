@@ -27,6 +27,15 @@ class CacheSettings(BaseSettings):
     redis_url: str | None = Field(default=None, alias="REDIS_URL")
 
 
+class RateLimitingSettings(BaseSettings):
+    enabled: bool = Field(default=False, alias="RATE_LIMIT_ENABLED")
+    redis_host: str = Field(default="localhost", alias="RATE_LIMIT_REDIS_HOST")
+    redis_port: int = Field(default=6379, alias="RATE_LIMIT_REDIS_PORT")
+    redis_db: int = Field(default=0, alias="RATE_LIMIT_REDIS_DB")
+    limit: int = Field(default=100, alias="RATE_LIMIT_REQUESTS")
+    window: int = Field(default=60, alias="RATE_LIMIT_WINDOW_SECONDS")
+
+
 class Settings(BaseSettings):
     openweathermap_api_key: str | None = Field(
         default=None, alias="OPENWEATHERMAP_API_KEY", repr=False
@@ -43,8 +52,9 @@ class Settings(BaseSettings):
     data_store_s3_bucket_name: str = "weather-svc-data"
     data_store_s3_folder_name: str = "weather-svc-responses"
 
-    # Caching configuration
     cache: CacheSettings = CacheSettings()
+
+    rate_limiting: RateLimitingSettings = RateLimitingSettings()
 
     class Config:
         env_file = ".env"

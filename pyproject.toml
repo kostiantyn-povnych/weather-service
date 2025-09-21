@@ -49,3 +49,8 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/weather_service"]
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = "fastapi_redis_rate_limiter.*"
+ignore_missing_imports = true

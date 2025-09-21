@@ -1,7 +1,6 @@
 import logging
 from typing import Any, Callable
 
-from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.backends.redis import RedisBackend

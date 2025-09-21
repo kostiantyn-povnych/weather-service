@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -8,16 +9,18 @@ from common.exceptions import BaseServiceException
 from telemetry import configure_logging
 from weather.router import router
 
+LOGGER = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Entering FastAPi application lifespan")
+    LOGGER.info("Entering FastAPi application lifespan")
     configure_logging()
 
     await init_cache(app)
 
     yield
-    print("Exiting FastAPi application lifespan")
+    LOGGER.info("Exiting FastAPi application lifespan")
 
 
 def handle_service_layer_exception(request: Request, exc: BaseServiceException):

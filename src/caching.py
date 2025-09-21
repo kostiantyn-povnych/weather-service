@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Callable
 
 from fastapi import FastAPI
@@ -8,6 +9,8 @@ from fastapi_cache.decorator import cache as _cache
 from redis.asyncio import from_url
 
 from settings import settings
+
+LOGGER = logging.getLogger(__name__)
 
 
 def cache_or_nop(
@@ -34,16 +37,19 @@ async def init_cache(app: FastAPI) -> None:
     If caching is disabled, do nothing (decorators are already no-op).
     """
     if not settings.cache.enabled:
+        LOGGER.info("Caching is disabled")
         return
 
     prefix = settings.cache.prefix
 
     if settings.cache.backend == "redis":
+        LOGGER.info("Initializing Redis cache...")
         redis = from_url(
             settings.cache.redis_url, encoding="utf-8", decode_responses=True
         )
         FastAPICache.init(RedisBackend(redis), prefix=prefix)
     elif settings.cache.backend == "memory":
+        LOGGER.info("Initializing in-memory cache...")
         FastAPICache.init(InMemoryBackend(), prefix=prefix)
     else:
         raise RuntimeError(f"Unsupported CACHE_BACKEND={settings.cache.backend}")

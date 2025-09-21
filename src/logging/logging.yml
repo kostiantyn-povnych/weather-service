@@ -1,0 +1,57 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  default:
+    "()": uvicorn.logging.DefaultFormatter
+    fmt: "%(levelprefix)s [%(asctime)s] %(name)s: %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    use_colors: true
+  access:
+    "()": uvicorn.logging.AccessFormatter
+    fmt: '%(levelprefix)s [%(asctime)s] server.access: %(client_addr)s - "%(request_line)s" %(status_code)s'
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  # Override for uvicorn.error
+  server:
+    "()": uvicorn.logging.DefaultFormatter
+    fmt: "%(levelprefix)s [%(asctime)s] server: %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    use_colors: true
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    stream: ext://sys.stdout
+  access:
+    class: logging.StreamHandler
+    formatter: access
+    stream: ext://sys.stdout
+  server:
+    class: logging.StreamHandler
+    formatter: server
+    stream: ext://sys.stdout
+
+loggers:
+  # Uvicorn lifecycle, server internals
+  uvicorn.error:
+    level: INFO
+    handlers: [server]
+    formatter: server
+    propagate: false
+
+  # One line per HTTP request
+  uvicorn.access:
+    level: INFO
+    handlers: [access]
+    propagate: false
+
+  # Your app namespace (use logging.getLogger("weather") or "weather.api", etc.)
+  weather:
+    level: INFO
+    handlers: [console]
+    propagate: false
+
+root:
+  level: INFO
+  handlers: [console]

@@ -37,11 +37,13 @@ class RateLimitingSettings(BaseSettings):
 
 
 class LocalEventStoreSettings(BaseSettings):
-    file_path: str = "events.log"
+    file_path: str = Field(default="events.log", alias="EVENT_STORE_LOCAL_FILE_PATH")
 
 
 class AwsDynamoDBEventStoreSettings(BaseSettings):
-    table_name: str = "weather-svc-events"
+    table_name: str = Field(
+        default="weather-svc-events", alias="EVENT_STORE_AWS_DYNAMODB_TABLE_NAME"
+    )
 
 
 class EventStoreSettings(BaseSettings):
@@ -51,16 +53,18 @@ class EventStoreSettings(BaseSettings):
 
 
 class LocalFileDataStoreSettings(BaseSettings):
-    directory: str = "data"
+    directory: str = Field(default="data", alias="DATA_STORE_LOCAL_DIRECTORY")
 
 
 class AwsS3DataStoreSettings(BaseSettings):
-    bucket_name: str = "weather-svc-data"
-    folder_name: str = "weather-svc-responses"
+    bucket_name: str = Field(
+        default="weather-svc-data", alias="DATA_STORE_S3_BUCKET_NAME"
+    )
+    folder_name: str = Field(default="weather", alias="DATA_STORE_S3_FOLDER_NAME")
 
 
 class DataStoreSettings(BaseSettings):
-    type: DataStoreType = DataStoreType.LOCAL
+    type: DataStoreType = Field(default=DataStoreType.LOCAL, alias="DATA_STORE_TYPE")
     local: LocalFileDataStoreSettings = LocalFileDataStoreSettings()
     aws_s3: AwsS3DataStoreSettings = AwsS3DataStoreSettings()
 

@@ -1,28 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Wait for LocalStack to be ready
-echo "Waiting for LocalStack to be ready..."
-until curl -s http://localhost:4566/_localstack/health | grep -q '"s3": "available"'; do
-  echo "Waiting for LocalStack..."
+AWS_ENDPOINT_URL="${AWS_ENDPOINT_URL:-http://localstack:4566}"
+AWS_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
+
+BUCKET_NAME="${DATA_STORE_S3_BUCKET_NAME:-weather-svc-data}"
+TABLE_NAME="${EVENT_STORE_AWS_DYNAMODB_TABLE_NAME:-weather-svc-events}"
+
+echo "Waiting for LocalStack to be ready at ${AWS_ENDPOINT_URL} ..."
+# LocalStack health sometimes returns partials; wait for overall ready + s3/dynamodb available
+until curl -fsS "${AWS_ENDPOINT_URL}/_localstack/health" | grep -q '"s3": "available"'; do
+  echo "  ... still waiting (s3 not available yet)"
   sleep 2
 done
+until curl -fsS "${AWS_ENDPOINT_URL}/_localstack/health" | grep -q '"dynamodb": "available"'; do
+  echo "  ... still waiting (dynamodb not available yet)"
+  sleep 2
+done
+echo "LocalStack is ready."
 
-echo "LocalStack is ready! Setting up AWS resources..."
+echo "Ensuring S3 bucket exists: ${BUCKET_NAME}"
+if aws --endpoint-url="${AWS_ENDPOINT_URL}" --region "${AWS_REGION}" s3api head-bucket --bucket "${BUCKET_NAME}" 2>/dev/null; then
+  echo "  Bucket already exists."
+else
+  aws --endpoint-url="${AWS_ENDPOINT_URL}" --region "${AWS_REGION}" s3api create-bucket \
+    --bucket "${BUCKET_NAME}" \
+    --create-bucket-configuration LocationConstraint="${AWS_REGION}" || {
+      # LocalStack S3 may ignore LocationConstraint; try plain s3 mb
+      aws --endpoint-url="${AWS_ENDPOINT_URL}" --region "${AWS_REGION}" s3 mb "s3://${BUCKET_NAME}" || true
+    }
+  echo "  Bucket created (or already present)."
+fi
 
-# Create S3 bucket
-aws --endpoint-url=http://localhost:4566 s3 mb s3://weather-data-bucket
-
-# Create DynamoDB table
-aws --endpoint-url=http://localhost:4566 dynamodb create-table \
-    --table-name weather-cache \
-    --attribute-definitions \
-        AttributeName=city,AttributeType=S \
-        AttributeName=timestamp,AttributeType=S \
-    --key-schema \
-        AttributeName=city,KeyType=HASH \
-        AttributeName=timestamp,KeyType=RANGE \
+echo "Ensuring DynamoDB table exists: ${TABLE_NAME}"
+if aws --endpoint-url="${AWS_ENDPOINT_URL}" --region "${AWS_REGION}" dynamodb describe-table --table-name "${TABLE_NAME}" >/dev/null 2>&1; then
+  echo "  Table already exists."
+else
+  aws --endpoint-url="${AWS_ENDPOINT_URL}" --region "${AWS_REGION}" dynamodb create-table \
+    --table-name "${TABLE_NAME}" \
+    --attribute-definitions AttributeName=id,AttributeType=S \
+    --key-schema AttributeName=id,KeyType=HASH \
     --billing-mode PAY_PER_REQUEST
+  echo "  Waiting for table to be active..."
+  aws --endpoint-url="${AWS_ENDPOINT_URL}" --region "${AWS_REGION}" dynamodb wait table-exists --table-name "${TABLE_NAME}"
+  echo "  Table is active."
+fi
 
-echo "AWS resources created successfully!"
-echo "S3 bucket: weather-data-bucket"
-echo "DynamoDB table: weather-cache"
+echo "Initialization complete."
+echo "S3 bucket: ${BUCKET_NAME}"
+echo "DynamoDB table: ${TABLE_NAME}"

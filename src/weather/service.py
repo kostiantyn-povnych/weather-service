@@ -1,4 +1,6 @@
 from common.exceptions import BaseServiceException
+from data_store.base import BaseDataStore
+from events.base import BaseEventStore
 from geo.base import GeoCodeLocationProvider
 from weather.providers.base import Location, WeatherProviderFactory
 
@@ -8,6 +10,8 @@ class WeatherService:
         self,
         weather_provider_factory: WeatherProviderFactory,
         geo_code_provider: GeoCodeLocationProvider,
+        event_store: BaseEventStore,
+        data_store: BaseDataStore,
     ):
         self.provider_factory = weather_provider_factory
         self.geo_code_provider = geo_code_provider

@@ -1,16 +1,21 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 
+from caching import init_cache
 from common.exceptions import BaseServiceException
+from telemetry import configure_logging
 from weather.router import router
-from weather.telemetry import configure_logging
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Entering FastAPi application lifespan")
     configure_logging()
+
+    await init_cache(app)
+
     yield
     print("Exiting FastAPi application lifespan")
 

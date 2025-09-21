@@ -1,9 +1,17 @@
 """OpenWeatherMap weather provider implementation."""
 
 import logging
+from typing import Any, Dict
+
 import httpx
-from typing import Dict, Any
-from .base import WeatherProvider, WeatherData, Location, WeatherProviderFactory
+
+from .base import (
+    Location,
+    WeatherData,
+    WeatherForecastData,
+    WeatherProvider,
+    WeatherProviderFactory,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -76,50 +84,6 @@ class OpenWeatherMapProvider(WeatherProvider):
             max_temp=data["main"].get("temp_max"),
         )
 
-    # async def resolve_location(
-    #     self, city: str, country_code: str | None = None, state: str | None = None
-    # ) -> List[Location]:
-    #     """Search for locations by name using OpenWeatherMap Geocoding API."""
-
-    #     def format_query(
-    #         city: str, country_code: str | None = None, state: str | None = None
-    #     ) -> str:
-    #         if state and country_code:
-    #             return f"{city},{state},{country_code}"
-    #         elif country_code:
-    #             return f"{city},{country_code}"
-    #         else:
-    #             return city
-
-    #     url = f"{self.GEOCODING_BASE_URL}/direct"
-    #     params: Dict[str, str | int] = {
-    #         "q": format_query(city, country_code, state),
-    #         "limit": 5,
-    #         "appid": self.api_key,
-    #     }
-
-    #     response = await self.httpx_client().get(url, params=params)
-    #     response.raise_for_status()
-
-    #     data = response.json()
-
-    #     LOGGER.info(f"Response: {response.json()}")
-
-    #     locations = []
-    #     for item in data:
-    #         locations.append(
-    #             Location(
-    #                 local_names=item["local_names"],
-    #                 latitude=item["lat"],
-    #                 longitude=item["lon"],
-    #                 name=item.get("name"),
-    #                 country=item.get("country"),
-    #                 state=item.get("state"),
-    #             )
-    #         )
-
-    #     return locations
-
     async def get_weather_by_city(
         self, city_name: str, country_code: str | None = None
     ) -> WeatherData:
@@ -148,6 +112,43 @@ class OpenWeatherMapProvider(WeatherProvider):
             min_temp=data["main"].get("temp_min"),
             max_temp=data["main"].get("temp_max"),
         )
+
+    async def get_weather_forecast(
+        self, location: Location, days: int = 3
+    ) -> list[WeatherForecastData]:
+        """Get weather forecast for a location."""
+        data = await self._make_request(
+            "forecast",
+            {
+                "lat": location.latitude,
+                "lon": location.longitude,
+                "units": "metric",
+                "cnt": days * 8,
+            },
+        )
+
+        forecast_list = []
+        for item in data["list"]:
+            weather_data = WeatherData(
+                temperature=item["main"]["temp"],
+                humidity=item["main"]["humidity"],
+                pressure=item["main"]["pressure"],
+                description=item["weather"][0]["description"],
+                wind_speed=item["wind"]["speed"],
+                wind_direction=item["wind"].get("deg", 0),
+                visibility=item.get("visibility", None),
+                feels_like=item["main"].get("feels_like"),
+                min_temp=item["main"].get("temp_min"),
+                max_temp=item["main"].get("temp_max"),
+            )
+
+            forecast_data = WeatherForecastData(
+                date=item["dt_txt"],
+                weather=weather_data,
+            )
+            forecast_list.append(forecast_data)
+
+        return forecast_list
 
 
 class OpenWeatherMapProviderFactory(WeatherProviderFactory):

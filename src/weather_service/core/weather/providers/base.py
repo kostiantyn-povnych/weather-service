@@ -26,6 +26,14 @@ class WeatherData(DataClassJsonMixin):
     max_temp: Optional[float] = None
 
 
+@dataclass
+class WeatherForecastData(DataClassJsonMixin):
+    """Weather forecast data model."""
+
+    date: str
+    weather: WeatherData
+
+
 class WeatherProvider(ABC):
     """Abstract base class for weather providers."""
 
@@ -44,12 +52,12 @@ class WeatherProvider(ABC):
         """Get current weather data for a location."""
         pass
 
-    # @abstractmethod
-    # async def get_weather_forecast(
-    #     self, location: Location, days: int = 5
-    # ) -> list[WeatherData]:
-    #     """Get weather forecast for a location."""
-    #     pass
+    @abstractmethod
+    async def get_weather_forecast(
+        self, location: Location, days: int = 3
+    ) -> list[WeatherForecastData]:
+        """Get weather forecast for a location."""
+        pass
 
 
 class WeatherProviderFactory(ABC):

@@ -73,19 +73,9 @@ class OpenWeatherGeoProvider(GeoCodeLocationProvider):
         # OpenWeatherMap API returns tends to return more than one location even though the city name doesn't exactly match.
         # Therefore, first we need to filter out the locations that don't exactly match the city name.
         locations = [
-            location for location in locations if location.name.lower() == city.lower()
+            location
+            for location in locations
+            if location.name.casefold() == city.casefold()
         ]
-
-        # If we still have multiple locations, let's do our best to return the best one but still
-        # trying to avoid ambiguity. Filter by exact state match.
-        if len(locations) > 1:
-            locations = [
-                location
-                for location in locations
-                if location.state is None
-                and state is None
-                or (location.state.casefold() if location.state else "")
-                == (state.casefold() if state else "")
-            ]
 
         return locations

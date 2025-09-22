@@ -99,7 +99,7 @@ class WeatherService:
             self._format_file_name(location.name, location.country, location.state),
             weather_info.to_json(indent=4).encode("utf-8"),
         )
-        await self.event_store.store_event(
+        await self.event_store.put_event(
             Event(
                 timestamp=dt.now(datetime.UTC),
                 city=location.name,

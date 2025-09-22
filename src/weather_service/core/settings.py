@@ -47,7 +47,7 @@ class AwsDynamoDBEventStoreSettings(BaseSettings):
 
 
 class EventStoreSettings(BaseSettings):
-    type: EventStoreType = EventStoreType.LOCAL
+    type: EventStoreType = Field(default=EventStoreType.LOCAL, alias="EVENT_STORE_TYPE")
     local: LocalEventStoreSettings = LocalEventStoreSettings()
     aws_dynamodb: AwsDynamoDBEventStoreSettings = AwsDynamoDBEventStoreSettings()
 

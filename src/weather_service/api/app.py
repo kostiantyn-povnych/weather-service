@@ -8,6 +8,10 @@ from weather_service.api.caching import init_cache
 from weather_service.api.rate_limiting import init_rate_limiting
 from weather_service.api.weather import router as weather_router
 from weather_service.core.exceptions import BaseServiceException
+from weather_service.core.weather.dependencies import (
+    create_data_store,
+    create_event_store,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,10 +20,19 @@ LOGGER = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     LOGGER.info("Entering FastAPi application lifespan")
 
-    init_cache()
+    await init_cache(app)
+
+    app.state.event_store = create_event_store()
+    await app.state.event_store.__aenter__()
+
+    app.state.data_store = create_data_store()
+    await app.state.data_store.__aenter__()
+
     yield
 
     LOGGER.info("Exiting FastAPI application lifespan")
+    await app.state.event_store.__aexit__(None, None, None)
+    await app.state.data_store.__aexit__(None, None, None)
 
 
 def fastApiApp():

@@ -28,3 +28,9 @@ class LocalFileDataStore(BaseDataStore):
             await f.write(data)
 
         return file_path
+
+    async def __aenter__(self) -> "LocalFileDataStore":
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        pass

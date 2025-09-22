@@ -5,10 +5,19 @@ A FastAPI-based weather service that provides current weather information for ci
 ## Features
 
 - **Weather Service**: Get current weather data for any city using OpenWeatherMap API
+- **Geolocation Service**: Resolve city names to coordinates using OpenWeatherMap Geocoding API
 - **Caching**: Redis-based caching to reduce API calls and improve performance
 - **Rate Limiting**: Configurable rate limiting to prevent API abuse
 - **Data Storage**: Support for both local file storage and AWS S3
 - **Event Logging**: Track API usage with DynamoDB or local file logging
+
+## Data Providers
+
+This service uses **OpenWeatherMap** as the primary data provider for both weather and geolocation services:
+
+- **Weather Data**: Current weather conditions, temperature, humidity, and more via OpenWeatherMap Current Weather API
+- **Geolocation**: City name resolution to coordinates via OpenWeatherMap Geocoding API
+- **API Key Required**: You'll need a free OpenWeatherMap API key to use this service
 
 ## Quick Start
 
@@ -116,7 +125,7 @@ Environment variables are configured via `.env` files. Copy one of the example f
 
 **Required:**
 
-- `OPENWEATHERMAP_API_KEY`: Your OpenWeatherMap API key
+- `OPENWEATHERMAP_API_KEY`: Your OpenWeatherMap API key (get a free key at [openweathermap.org](https://openweathermap.org/api))
 
 **Optional (see example files for full configuration):**
 

@@ -9,7 +9,7 @@ services:
       # External API (only configurable env var)
       - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY:-}
 
-      # AWS / LocalStack (hardcoded for Docker Compose)
+      # AWS / LocalStack
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
       - AWS_DEFAULT_REGION=us-east-1

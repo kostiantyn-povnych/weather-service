@@ -84,14 +84,17 @@ class WeatherService:
         if len(locations) == 0:
             return []
 
-        async with self.provider_factory.provider() as provider:
-            weather_forecast_by_location = []
+        weather_forecast_by_location = []
 
-            for location in locations:
-                weather_forecast = await provider.get_weather_forecast(location, days)
-                weather_forecast_by_location.append((location, weather_forecast))
+        for location in locations:
+            weather_forecast = (
+                await self.provider_factory.provider().get_weather_forecast(
+                    location, days
+                )
+            )
+            weather_forecast_by_location.append((location, weather_forecast))
 
-            return weather_forecast_by_location
+        return weather_forecast_by_location
 
     async def _store_weather_info(
         self, location: Location, weather_info: WeatherData

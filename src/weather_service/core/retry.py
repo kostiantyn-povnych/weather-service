@@ -3,7 +3,7 @@
 import asyncio
 import logging
 from functools import wraps
-from typing import Callable, TypeVar
+from typing import Awaitable, Callable, TypeVar
 
 import httpx
 
@@ -68,13 +68,13 @@ def calculate_delay(attempt: int, config: RetryConfig) -> float:
 def with_retry(
     config: RetryConfig | None = None,
     provider_name: str = "Unknown Provider",
-) -> Callable[[Callable[..., T]], Callable[..., T]]:
+) -> Callable[[Callable[..., Awaitable[T]]], Callable[..., Awaitable[T]]]:
     """Decorator to add retry logic to async functions."""
 
     if config is None:
         config = RetryConfig()
 
-    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+    def decorator(func: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> T:
             last_error = None

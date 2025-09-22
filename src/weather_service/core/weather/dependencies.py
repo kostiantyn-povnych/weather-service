@@ -1,7 +1,9 @@
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
+import aioboto3
 from fastapi import Depends, Request
 
 from weather_service.core.data_store.aws_s3 import AwsS3DataStore
@@ -40,7 +42,17 @@ def get_geo_code_provider() -> GeoCodeLocationProvider:
     return OpenWeatherGeoProvider(api_key=settings.openweathermap_api_key)
 
 
-def create_event_store() -> BaseEventStore:
+@lru_cache()
+def get_aws_session() -> aioboto3.Session:
+    """Get AWS session instance."""
+    return aioboto3.Session()
+
+
+AwsSessionDependency = Annotated[aioboto3.Session, Depends(get_aws_session)]
+
+
+@lru_cache()
+def create_event_store(aws_session: AwsSessionDependency) -> BaseEventStore:
     """Create event store instance based on configuration."""
     if settings.event_store.type == EventStoreType.LOCAL:
         LOGGER.info(
@@ -51,12 +63,14 @@ def create_event_store() -> BaseEventStore:
         LOGGER.info(
             f"Creating AWS DynamoDB event store with table name: {settings.event_store.aws_dynamodb.table_name}"
         )
-        return AwsDynamoDBEventStore(table=settings.event_store.aws_dynamodb.table_name)
+        return AwsDynamoDBEventStore(
+            aws_session=aws_session, table=settings.event_store.aws_dynamodb.table_name
+        )
     else:
         raise ValueError(f"Unsupported event store type: {settings.event_store.type}")
 
 
-def create_data_store() -> BaseDataStore:
+def create_data_store(aws_session: AwsSessionDependency) -> BaseDataStore:
     """Create data store instance based on configuration."""
     if settings.data_store.type == DataStoreType.LOCAL:
         LOGGER.info(
@@ -65,9 +79,10 @@ def create_data_store() -> BaseDataStore:
         return LocalFileDataStore(directory=settings.data_store.local.directory)
     elif settings.data_store.type == DataStoreType.AWS_S3:
         LOGGER.info(
-            f"Initializing AWS S3 data store with bucket name: {settings.data_store.aws_s3.bucket_name}"
+            f"Creating AWS S3 data store with bucket name: {settings.data_store.aws_s3.bucket_name}"
         )
         return AwsS3DataStore(
+            aws_session=aws_session,
             bucket_name=settings.data_store.aws_s3.bucket_name,
             folder_name=settings.data_store.aws_s3.folder_name,
         )

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rye
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Rye
+        uses: eifinger/setup-rye@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: rye sync
+
+      - name: Run all checks
+        run: rye run all-checks
+
+      - name: Run integration tests
+        run: rye run test
+        env:
+          OPENWEATHERMAP_API_KEY: ${{ secrets.OPENWEATHERMAP_API_KEY }}

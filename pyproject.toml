@@ -1,0 +1,59 @@
+[project]
+name = "weather-service"
+version = "0.1.0"
+description = "Simple weather service"
+authors = [
+    { name = "Kostiantyn Povnych", email = "kostiantyn.povnych@gmail.com" },
+]
+dependencies = [
+    "fastapi[standard]>=0.116.2",
+    "aiohttp>=3.8.0",
+    "pydantic-settings>=2.10.1",
+    "aiofiles>=24.1.0",
+    "aioboto3>=15.1.0",
+    "cachetools>=6.2.0",
+    "redis>=6.4.0",
+    "fastapi-cache2>=0.2.2",
+    "fastapi-redis-rate-limiter>=1.0.1",
+    "dataclasses-json>=0.6.7",
+    "types-dataclasses-json>=0.5.9",
+    "retry-async>=0.1.4",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "black>=25.1.0",
+    "ruff>=0.11.12",
+    "mypy>=1.16.0",
+    "typos>=1.32.0",
+    "alembic>=1.16.1",
+    "types-python-jose>=3.5.0.20250531",
+    "types-aiofiles>=24.1.0",
+    "fastapi[standard]>=0.116.2",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.28.0",
+    "types-aioboto3>=15.1.0",
+]
+
+[tool.rye.scripts]
+all-checks = "sh -c 'black src/ --check && ruff check && mypy src/' && typos ."
+test = "pytest tests/ -v"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/weather_service"]
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+module = "fastapi_redis_rate_limiter.*"
+ignore_missing_imports = true

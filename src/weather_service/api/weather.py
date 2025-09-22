@@ -37,7 +37,7 @@ def get_city_query_params(
         nullable=True,
     ),
     state: str = Query(
-        "",
+        None,
         description="State or province name to narrow down the search",
         example="England",
         nullable=True,

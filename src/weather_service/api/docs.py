@@ -1,7 +1,10 @@
 """API documentation and examples for the weather service endpoints."""
 
 # Router configuration
-ROUTER_RESPONSES = {
+from enum import Enum
+from typing import Any
+
+ROUTER_RESPONSES: dict[int | str, dict[str, Any]] = {
     404: {"description": "Not found"},
     500: {"description": "Internal server error"},
 }
@@ -20,7 +23,7 @@ If multiple cities match the search criteria, all matching cities will be return
 - `/weather?city=Springfield&state=Illinois` - Get weather for Springfield, Illinois
 """
 
-WEATHER_RESPONSES = {
+WEATHER_RESPONSES: dict[int | str, dict[str, Any]] = {
     200: {
         "description": "Successfully retrieved weather data",
         "content": {
@@ -62,7 +65,7 @@ WEATHER_RESPONSES = {
     },
 }
 
-WEATHER_TAGS = ["Weather"]
+WEATHER_TAGS: list[str | Enum] | None = ["Weather"]
 
 # Weather forecast endpoint documentation
 FORECAST_SUMMARY = "Get weather forecast by city"
@@ -82,7 +85,7 @@ Forecasts are provided in 3-hour intervals, giving you detailed weather predicti
 - `/weather-forecast?city=Paris&country_code=FR&days=5` - Get 5-day forecast for Paris, France
 """
 
-FORECAST_RESPONSES = {
+FORECAST_RESPONSES: dict[int | str, dict[str, Any]] = {
     200: {
         "description": "Successfully retrieved weather forecast data",
         "content": {
@@ -157,4 +160,4 @@ FORECAST_RESPONSES = {
     },
 }
 
-FORECAST_TAGS = ["Weather Forecast"]
+FORECAST_TAGS: list[str | Enum] | None = ["Weather Forecast"]

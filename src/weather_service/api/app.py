@@ -16,7 +16,7 @@ LOGGER = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     LOGGER.info("Entering FastAPi application lifespan")
 
-    await init_cache(app)
+    init_cache()
 
     yield
 

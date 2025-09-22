@@ -150,6 +150,12 @@ async def get_weather(
         params.city, params.country_code, params.state
     )
 
+    if not data:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No weather data found for the given parameters. City: {params.city}, Country: {params.country_code or 'Unspecified'}, State: {params.state or 'Unspecified'}",
+        )
+
     response: list[CityCurrentWeatherResponse] = list(
         map(
             lambda x: CityCurrentWeatherResponse(

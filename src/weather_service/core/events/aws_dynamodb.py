@@ -20,11 +20,12 @@ class AwsDynamoDBEventStore(BaseEventStore):
 
         async with self._aws_session.client("dynamodb") as dynamo_db_client:
             event_dict = {
-                "timestamp": event.timestamp.isoformat(),
-                "city": event.city,
-                "country_code": event.country_code,
-                "state": event.state,
-                "url": event.url,
+                "id": {"S": event.id()},
+                "timestamp": {"S": event.timestamp.isoformat()},
+                "city": {"S": event.city},
+                "country_code": {"S": event.country_code},
+                "state": {"S": event.state} if event.state else {"NULL": True},
+                "url": {"S": event.url},
             }
             await dynamo_db_client.put_item(Item=event_dict, TableName=self._table)
 

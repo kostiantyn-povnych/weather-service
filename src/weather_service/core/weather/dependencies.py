@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Annotated
 
 import aioboto3
-from fastapi import Depends, Request
+from fastapi import Depends
 
 from weather_service.core.data_store.aws_s3 import AwsS3DataStore
 from weather_service.core.data_store.base import BaseDataStore
@@ -52,7 +52,7 @@ AwsSessionDependency = Annotated[aioboto3.Session, Depends(get_aws_session)]
 
 
 @lru_cache()
-def create_event_store(aws_session: AwsSessionDependency) -> BaseEventStore:
+def get_event_store(aws_session: AwsSessionDependency) -> BaseEventStore:
     """Create event store instance based on configuration."""
     if settings.event_store.type == EventStoreType.LOCAL:
         LOGGER.info(
@@ -70,7 +70,7 @@ def create_event_store(aws_session: AwsSessionDependency) -> BaseEventStore:
         raise ValueError(f"Unsupported event store type: {settings.event_store.type}")
 
 
-def create_data_store(aws_session: AwsSessionDependency) -> BaseDataStore:
+def get_data_store(aws_session: AwsSessionDependency) -> BaseDataStore:
     """Create data store instance based on configuration."""
     if settings.data_store.type == DataStoreType.LOCAL:
         LOGGER.info(
@@ -90,41 +90,21 @@ def create_data_store(aws_session: AwsSessionDependency) -> BaseDataStore:
         raise ValueError(f"Unsupported data store type: {settings.data_store.type}")
 
 
-# @lru_cache()
-# def get_event_store() -> BaseEventStore:
-#     """Get event store instance based on configuration."""
-#     if settings.event_store.type == EventStoreType.LOCAL:
-#         return LocalEventStore(file_path=Path(settings.event_store.local.file_path))
-#     elif settings.event_store.type == EventStoreType.AWS_DYNAMODB:
-#         return AwsDynamoDBEventStore(
-#             table_name=settings.event_store.aws_dynamodb.table_name
-#         )
-#     else:
-#         raise ValueError(f"Unsupported event store type: {settings.event_store.type}")
-
-
-# @lru_cache()
-# def get_data_store() -> BaseDataStore:
-#     """Get data store instance based on configuration."""
-#     if settings.data_store.type == DataStoreType.LOCAL:
-#         return LocalFileDataStore(directory=settings.data_store.local.directory)
-#     elif settings.data_store.type == DataStoreType.AWS_S3:
-#         return AwsS3DataStore(
-#             bucket_name=settings.data_store.aws_s3.bucket_name,
-#             folder_name=settings.data_store.aws_s3.folder_name,
-#         )
-#     else:
-#         raise ValueError(f"Unsupported data store type: {settings.data_store.type}")
-
-
 def get_weather_service(
-    request: Request,
-    provider: WeatherProviderFactory = Depends(get_weather_provider_factory),
+    weather_provider_factory: WeatherProviderFactory = Depends(
+        get_weather_provider_factory
+    ),
+    geo_code_provider: GeoCodeLocationProvider = Depends(get_geo_code_provider),
+    event_store: BaseEventStore = Depends(get_event_store),
+    data_store: BaseDataStore = Depends(get_data_store),
 ) -> WeatherService:
     """Get weather service instance with dependency injection."""
     return WeatherService(
-        weather_provider_factory=provider,
-        geo_code_provider=get_geo_code_provider(),
-        event_store=request.app.state.event_store,
-        data_store=request.app.state.data_store,
+        weather_provider_factory=weather_provider_factory,
+        geo_code_provider=geo_code_provider,
+        event_store=event_store,
+        data_store=data_store,
     )
+
+
+WeatherServiceDependency = Annotated[WeatherService, Depends(get_weather_service)]

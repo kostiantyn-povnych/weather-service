@@ -79,8 +79,6 @@ class Settings(BaseSettings):
     cache: CacheSettings = CacheSettings()
     rate_limiting: RateLimitingSettings = RateLimitingSettings()
 
-    rate_limiting: RateLimitingSettings = RateLimitingSettings()
-
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

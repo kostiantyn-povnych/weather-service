@@ -11,6 +11,11 @@ class Event:
     state: str | None
     url: str
 
+    def id(self) -> str:
+        return (
+            f"{self.timestamp.isoformat()}_{self.city}_{self.country_code}_{self.state}"
+        )
+
 
 class BaseEventStore(ABC):
     @abstractmethod

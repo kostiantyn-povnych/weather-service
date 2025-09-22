@@ -23,7 +23,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
 
       # Rate limiting config
-      - RATE_LIMIT_ENABLED=false
+      - RATE_LIMIT_ENABLED=true
       - RATE_LIMIT_REDIS_HOST=redis
       - RATE_LIMIT_REDIS_PORT=6379
       - RATE_LIMIT_REDIS_DB=0

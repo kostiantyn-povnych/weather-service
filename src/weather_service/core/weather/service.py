@@ -49,20 +49,21 @@ class WeatherService:
         if len(locations) == 0:
             return []
 
-        async with self.provider_factory.provider() as provider:
-            weather_infos_by_location = []
-            for location in locations:
-                weather_info = await provider.get_current_weather(location)
-                weather_infos_by_location.append((location, weather_info))
-
-            await asyncio.gather(
-                *[
-                    self._store_weather_info(location, weather_info)
-                    for location, weather_info in weather_infos_by_location
-                ]
+        weather_infos_by_location = []
+        for location in locations:
+            weather_info = await self.provider_factory.provider().get_current_weather(
+                location
             )
+            weather_infos_by_location.append((location, weather_info))
 
-            return weather_infos_by_location
+        await asyncio.gather(
+            *[
+                self._store_weather_info(location, weather_info)
+                for location, weather_info in weather_infos_by_location
+            ]
+        )
+
+        return weather_infos_by_location
 
     async def get_weather_forecast_by_city(
         self,

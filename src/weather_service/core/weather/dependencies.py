@@ -16,7 +16,7 @@ from weather_service.core.geo.base import GeoCodeLocationProvider
 from weather_service.core.geo.open_weather_geo_provider import OpenWeatherGeoProvider
 from weather_service.core.settings import DataStoreType, EventStoreType, settings
 from weather_service.core.weather.providers.base import WeatherProviderFactory
-from weather_service.core.weather.providers.openweathermap import (
+from weather_service.core.weather.providers.open_weather import (
     OpenWeatherMapProviderFactory,
 )
 from weather_service.core.weather.service import WeatherService

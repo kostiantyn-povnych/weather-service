@@ -4,7 +4,7 @@ import logging
 
 from weather_service.core.geo.base import GeoCodeLocationProvider, Location
 from weather_service.core.retry import RetryConfig
-from weather_service.core.third_party.openweather import OpenWeatherApiClient
+from weather_service.third_party.openweather import OpenWeatherApiClient
 
 PROVIDER_NAME = "OpenWeatherGeo"
 

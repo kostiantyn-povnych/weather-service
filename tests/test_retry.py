@@ -1,8 +1,5 @@
 """Unit tests for the retry module."""
 
-import asyncio
-from unittest.mock import AsyncMock, patch
-
 import httpx
 import pytest
 

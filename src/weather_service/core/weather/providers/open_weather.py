@@ -3,7 +3,7 @@
 import logging
 
 from weather_service.core.retry import RetryConfig
-from weather_service.core.third_party.openweather import OpenWeatherApiClient
+from weather_service.third_party.openweather import OpenWeatherApiClient
 
 from .base import (
     Location,

@@ -1,9 +1,9 @@
 """OpenWeatherMap weather provider implementation."""
 
 import logging
-from typing import Any, Dict
 
-import httpx
+from weather_service.core.retry import RetryConfig
+from weather_service.core.third_party.openweather import OpenWeatherApiClient
 
 from .base import (
     Location,
@@ -15,148 +15,71 @@ from .base import (
 
 LOGGER = logging.getLogger(__name__)
 
+PROVIDER_NAME = "OpenWeatherMap"
+
 
 class OpenWeatherMapProvider(WeatherProvider):
     """OpenWeatherMap weather provider implementation."""
 
-    WEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5"
-
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, retry_config: RetryConfig | None = None):
         """Initialize OpenWeatherMap provider."""
-        self._client: httpx.AsyncClient | None = None
-        self.api_key = api_key
-
-    async def __aenter__(self) -> WeatherProvider:
-        """Async context manager entry."""
-        self._client = httpx.AsyncClient()
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Async context manager exit."""
-        if self._client:
-            await self._client.aclose()
-
-    def httpx_client(self) -> httpx.AsyncClient:
-        """Get the underlying HTTP client."""
-        if not self._client:
-            raise RuntimeError(
-                "HTTP client not initialized. Use the async context manager"
-            )
-        return self._client
-
-    async def _make_request(
-        self, endpoint: str, params: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """Make HTTP request to OpenWeatherMap API."""
-
-        url = f"{self.WEATHER_BASE_URL}/{endpoint}"
-        params["appid"] = self.api_key
-
-        response = await self.httpx_client().get(url, params=params)
-
-        if response.is_error:
-            LOGGER.error(f"Error response from OpenWeatherMap API: {response.text}")
-
-        response.raise_for_status()
-        return response.json()
+        self.api_client = OpenWeatherApiClient(
+            api_key=api_key, retry_config=retry_config
+        )
 
     async def get_current_weather(self, location: Location) -> WeatherData:
         """Get current weather data for a location."""
-        data = await self._make_request(
-            "weather",
-            {
-                "lat": location.latitude,
-                "lon": location.longitude,
-                "units": "metric",
-            },
+        response = await self.api_client.get_current_weather_by_coords(
+            location.latitude, location.longitude
         )
-
-        return WeatherData(
-            temperature=data["main"]["temp"],
-            humidity=data["main"]["humidity"],
-            pressure=data["main"]["pressure"],
-            description=data["weather"][0]["description"],
-            wind_speed=data["wind"]["speed"],
-            wind_direction=data["wind"].get("deg", 0),
-            visibility=data.get("visibility", None),
-            feels_like=data["main"].get("feels_like"),
-            min_temp=data["main"].get("temp_min"),
-            max_temp=data["main"].get("temp_max"),
-        )
-
-    async def get_weather_by_city(
-        self, city_name: str, country_code: str | None = None
-    ) -> WeatherData:
-        """Get current weather by city name."""
-
-        query = city_name
-        if country_code:
-            query = f"{city_name},{country_code}"
-
-        url = f"{self.WEATHER_BASE_URL}/weather"
-        params = {"q": query, "appid": self.api_key, "units": "metric"}
-
-        response = await self.httpx_client().get(url, params=params)
-        response.raise_for_status()
-        data = await response.json()
-
-        return WeatherData(
-            temperature=data["main"]["temp"],
-            humidity=data["main"]["humidity"],
-            pressure=data["main"]["pressure"],
-            description=data["weather"][0]["description"],
-            wind_speed=data["wind"]["speed"],
-            wind_direction=data["wind"].get("deg", 0),
-            visibility=data.get("visibility", None),
-            feels_like=data["main"].get("feels_like"),
-            min_temp=data["main"].get("temp_min"),
-            max_temp=data["main"].get("temp_max"),
-        )
+        return self._convert_to_weather_data(response)
 
     async def get_weather_forecast(
         self, location: Location, days: int = 3
     ) -> list[WeatherForecastData]:
         """Get weather forecast for a location."""
-        data = await self._make_request(
-            "forecast",
-            {
-                "lat": location.latitude,
-                "lon": location.longitude,
-                "units": "metric",
-                "cnt": days * 8,
-            },
+        response = await self.api_client.get_weather_forecast(
+            location.latitude, location.longitude, days
+        )
+        return self._convert_to_forecast_data(response)
+
+    def _convert_to_weather_data(self, response) -> WeatherData:
+        """Convert OpenWeather API response to WeatherData."""
+        return WeatherData(
+            temperature=response.main.temp,
+            humidity=response.main.humidity,
+            pressure=response.main.pressure,
+            description=response.weather[0].description,
+            wind_speed=response.wind.speed,
+            wind_direction=response.wind.deg or 0,
+            visibility=response.visibility,
+            feels_like=response.main.feels_like,
+            min_temp=response.main.temp_min,
+            max_temp=response.main.temp_max,
         )
 
+    def _convert_to_forecast_data(self, response) -> list[WeatherForecastData]:
+        """Convert OpenWeather forecast response to WeatherForecastData list."""
         forecast_list = []
-        for item in data["list"]:
-            weather_data = WeatherData(
-                temperature=item["main"]["temp"],
-                humidity=item["main"]["humidity"],
-                pressure=item["main"]["pressure"],
-                description=item["weather"][0]["description"],
-                wind_speed=item["wind"]["speed"],
-                wind_direction=item["wind"].get("deg", 0),
-                visibility=item.get("visibility", None),
-                feels_like=item["main"].get("feels_like"),
-                min_temp=item["main"].get("temp_min"),
-                max_temp=item["main"].get("temp_max"),
-            )
-
+        for item in response.list:
+            weather_data = self._convert_to_weather_data(item)
             forecast_data = WeatherForecastData(
-                date=item["dt_txt"],
+                date=item.dt_txt,
                 weather=weather_data,
             )
             forecast_list.append(forecast_data)
-
         return forecast_list
 
 
 class OpenWeatherMapProviderFactory(WeatherProviderFactory):
     """OpenWeatherMap provider factory implementation."""
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, retry_config: RetryConfig | None = None):
         self.api_key = api_key
+        self.retry_config = retry_config
 
     def provider(self) -> WeatherProvider:
         """Get weather provider instance."""
-        return OpenWeatherMapProvider(api_key=self.api_key)
+        return OpenWeatherMapProvider(
+            api_key=self.api_key, retry_config=self.retry_config
+        )

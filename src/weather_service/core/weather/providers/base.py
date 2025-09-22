@@ -38,16 +38,6 @@ class WeatherProvider(ABC):
     """Abstract base class for weather providers."""
 
     @abstractmethod
-    async def __aenter__(self) -> "WeatherProvider":
-        """Async context manager entry."""
-        pass
-
-    @abstractmethod
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Async context manager exit."""
-        pass
-
-    @abstractmethod
     async def get_current_weather(self, location: Location) -> WeatherData:
         """Get current weather data for a location."""
         pass

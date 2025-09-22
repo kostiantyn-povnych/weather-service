@@ -45,30 +45,7 @@ loggers:
     handlers: [access]
     propagate: false
 
-  # Your app namespace (use logging.getLogger("weather") or "weather.api", etc.)
-  weather:
-    level: INFO
-    handlers: [console]
-    propagate: false
-
-  # Application modules
-  caching:
-    level: INFO
-    handlers: [console]
-    propagate: false
-
-  events:
-    level: INFO
-    handlers: [console]
-    propagate: false
-
-  geo:
-    level: INFO
-    handlers: [console]
-    propagate: false
-
-  # Main module logger
-  __main__:
+  weather_service:
     level: INFO
     handlers: [console]
     propagate: false
